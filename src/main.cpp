@@ -4,6 +4,7 @@
 #include "dbStruct.h"
 #include "cfgSettings.h"
 #include "convertions.h"
+#include "LoraTransceiver.h"
 
 //#define INSTALL
 #ifdef INSTALL
@@ -19,6 +20,18 @@ using ::std::endl;
 
 int main(int argc, char const *argv[])
 {
+    /* Variables */
+    uint64_t _latestId;
+    char _device[20];
+
+    /* structs */
+    gas_values _gv;
+    lora_payload _lp;
+
+    /* objets */
+    sqlConnector _sql;
+    LoraTransceiver _lora;
+
     plog::init(plog::debug, LOG_PATH, 1000000, 3); // Initialize the logger. 1MB
     PLOG_INFO << ">>>>>>>>>>>>>>>Init Program<<<<<<<<<<<<<<<";
 
@@ -33,8 +46,35 @@ int main(int argc, char const *argv[])
         return EXIT_FAILURE;
     }
 
-    /* sql objet */
-    sqlConnector _sql;
+    /* Connect to usb stick */
+    uint8_t _status;
+    for (uint8_t _devNumber = 0; _devNumber < 5; _devNumber++) {
+        std::string dev = "/dev/ttyACM" + std::to_string(_devNumber);
+        strcpy(_device,dev.c_str());
+
+        _lora.setConfigValues(_device,115200);
+        _status = _lora.openSerial();
+        
+        if (_status){
+            PLOG_INFO << "Check communication to: " << _device;
+            _lora.sendPayload("[CC]");
+            sleep(2);
+        
+            std::string readStr = _lora.read();
+            if (readStr.find(std::string("OK")) != std::string::npos) {
+                PLOG_INFO << "Match protocol with: " << _device;
+                //cout << "connected";
+                break;
+            }
+            _lora.closeSerial();
+        }
+        sleep(1);
+    }
+
+    if (!_status) {
+        PLOG_ERROR << "Can't open serial port";
+        return EXIT_FAILURE;
+    }
 
     /* configure db */
     _sql.setUser(_sqlCfg.user);
@@ -45,55 +85,9 @@ int main(int argc, char const *argv[])
     /* connect to db*/
     _sql.connect();
 
-    /* structs */
-    gas_values _gv;
-    lora_payload _lp;
+    /*for (;;) {
 
-    cout << "Latest id: " << _sql.getLatestId() << endl;
-
-    _sql.fetch_gas_values(&_gv);
-    _gv.amb._tem = -10;
-
-    cout << "ID:  \t" << _gv._id << endl
-         << "TEMP:  \t" << _gv.amb._tem << endl
-         << "PRE:  \t" << _gv.amb._pre << endl
-         << "HUM:  \t" << _gv.amb._hum << endl
-         << "CO:  \t" << _gv._co * 1000 << endl
-         << "O3:  \t" << _gv._o3 * 1000 << endl
-         << "SO2:  \t" << _gv._so2 * 1000 << endl
-         << "NO2:  \t" << _gv._no2 * 1000 << endl
-         << "PM1:  \t" << _gv._pm1 * 1000 << endl
-         << "PM10:  \t" << _gv._pm10 * 1000 << endl
-         << "PM25:  \t" << _gv._pm25 * 1000 << endl;
-
-    makeLoRaPayload(&_gv, &_lp);
-
-    cout << "LoRa RAW Payload: \n";
-    for (uint8_t i = 0; i < sizeof(_lp); ++i) {
-        printf("0x%02X ",_lp._raw[i]);
-    }
-    cout << endl;
-
-    printf("LoRa bytes Payload: \n");
-    printf("0x%02X ",(uint8_t)_lp._bytes._tem);
-    printf("0x%02X ",(uint8_t)_lp._bytes._hum);
-    printf("0x%02X ",(uint8_t)(_lp._bytes._pre & 0xFF));
-    printf("0x%02X ",(uint8_t)((_lp._bytes._pre >> 8) & 0xFF));
-    printf("0x%02X ",(uint8_t)(_lp._bytes._co & 0xFF));
-    printf("0x%02X ",(uint8_t)((_lp._bytes._co >> 8) & 0xFF));
-    printf("0x%02X ",(uint8_t)(_lp._bytes._o3 & 0xFF));
-    printf("0x%02X ",(uint8_t)((_lp._bytes._o3 >> 8) & 0xFF));
-    printf("0x%02X ",(uint8_t)(_lp._bytes._so2 & 0xFF));
-    printf("0x%02X ",(uint8_t)((_lp._bytes._so2 >> 8) & 0xFF));
-    printf("0x%02X ",(uint8_t)(_lp._bytes._no2 & 0xFF));
-    printf("0x%02X ",(uint8_t)((_lp._bytes._no2 >> 8) & 0xFF));
-    printf("0x%02X ",(uint8_t)(_lp._bytes._pm1 & 0xFF));
-    printf("0x%02X ",(uint8_t)((_lp._bytes._pm1 >> 8) & 0xFF));
-    printf("0x%02X ",(uint8_t)(_lp._bytes._pm10 & 0xFF));
-    printf("0x%02X ",(uint8_t)((_lp._bytes._pm10 >> 8) & 0xFF));
-    printf("0x%02X ",(uint8_t)(_lp._bytes._pm25 & 0xFF));
-    printf("0x%02X \n",(uint8_t)((_lp._bytes._pm25 >> 8) & 0xFF));
-
+    }*/
     
     return EXIT_SUCCESS;
 }

@@ -10,16 +10,17 @@ class LoraTransceiver
 private:
     int _fd;
     int _baud;
-    char _dev[30]; // /dev/ttyACM1
+    char _dev[40]; // /dev/ttyACM0
 
 public:
-    LoraTransceiver(/* args */);
+    LoraTransceiver();
+    LoraTransceiver(const char *_device,const int _bauRate);
     ~LoraTransceiver();
     void setConfigValues(const char *_device,const int _bauRate);
     uint8_t openSerial();
+    void closeSerial();
     void sendPayload(const char *_payload);
-    std::string read();    
-
+    std::string read();
 };
 
 

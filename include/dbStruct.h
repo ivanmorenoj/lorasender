@@ -46,7 +46,7 @@ struct byte_payload{
 
 union lora_payload{
     byte_payload _bytes;
-    uint8_t _raw[19];
+    uint8_t _raw[20];
 };
 
 #endif
