@@ -1,0 +1,14 @@
+[Unit]
+Description= LoRa Sender
+After=syslog.target mysqld.service
+Requires=mysqld.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/lorasender
+Restart=on-failure
+RestartSec=10
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
