@@ -28,7 +28,7 @@ struct gas_values{
     float       _pm25;  // in ppm 
 };
 
-struct lora_payload {
+struct byte_payload{
     // ambiental variables
     int8_t      _tem;   // -127 - 127 in °C
     uint8_t     _hum;   // 0 - 100 in %
@@ -42,9 +42,11 @@ struct lora_payload {
     uint16_t    _pm1;   // 0 - 65535 in ppb 
     uint16_t    _pm10;  // 0 - 65535 in ppb 
     uint16_t    _pm25;  // 0 - 65535 in ppb
-    
-    // raw payload  
-    uint8_t _raw[20];   // 18 bytes + null termination
+};
+
+union lora_payload{
+    byte_payload _bytes;
+    uint8_t _raw[19];
 };
 
 #endif

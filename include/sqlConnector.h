@@ -41,7 +41,7 @@ public:
     void excecuteQuery(char * query_str);
 
     uint64_t getLatestId();
-    struct gas_values fetch_gas_values();
+    void fetch_gas_values(gas_values *_gv);
 };
 
 #endif //SQLCONNECTOR_H_
