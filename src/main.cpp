@@ -1,10 +1,10 @@
 #include <iostream>
+#include <wiringSerial.h>
 #include "plog/Log.h"
 #include "sqlConnector.h"
 #include "dbStruct.h"
 #include "cfgSettings.h"
 #include "convertions.h"
-#include "LoraTransceiver.h"
 
 //#define INSTALL
 #ifdef INSTALL
@@ -12,7 +12,7 @@
     #define LOG_PATH    "/var/log/lorasender/lorasender.log"
 #else
     #define CFG_PATH    "mainConfig.cfg"
-    #define LOG_PATH    "lorasender.log"
+    #define LOG_PATH    "logger.log"
 #endif 
 
 using ::std::cout;
@@ -23,6 +23,7 @@ int main(int argc, char const *argv[])
     /* Variables */
     uint64_t _latestId;
     char _device[20];
+    int _serialFd;
 
     /* structs */
     gas_values _gv;
@@ -30,7 +31,6 @@ int main(int argc, char const *argv[])
 
     /* objets */
     sqlConnector _sql;
-    LoraTransceiver _lora;
 
     plog::init(plog::debug, LOG_PATH, 1000000, 3); // Initialize the logger. 1MB
     PLOG_INFO << ">>>>>>>>>>>>>>>Init Program<<<<<<<<<<<<<<<";
@@ -46,35 +46,27 @@ int main(int argc, char const *argv[])
         return EXIT_FAILURE;
     }
 
-    /* Connect to usb stick */
-    uint8_t _status;
-    for (uint8_t _devNumber = 0; _devNumber < 5; _devNumber++) {
-        std::string dev = "/dev/ttyACM" + std::to_string(_devNumber);
-        strcpy(_device,dev.c_str());
+    /* Open Serial port */
+    _serialFd = serialOpen("/dev/ttyACM0",115200);
 
-        _lora.setConfigValues(_device,115200);
-        _status = _lora.openSerial();
-        
-        if (_status){
-            PLOG_INFO << "Check communication to: " << _device;
-            _lora.sendPayload("[CC]");
-            sleep(2);
-        
-            std::string readStr = _lora.read();
-            if (readStr.find(std::string("OK")) != std::string::npos) {
-                PLOG_INFO << "Match protocol with: " << _device;
-                //cout << "connected";
-                break;
-            }
-            _lora.closeSerial();
-        }
-        sleep(1);
-    }
-
-    if (!_status) {
-        PLOG_ERROR << "Can't open serial port";
+    if (_serialFd < 0) {
+        cout << "cannot open serial port";
         return EXIT_FAILURE;
+    } else {
+        cout << "serial port open";
     }
+
+    /* check protocol */
+    serialPuts(_serialFd,"[CC]");
+    sleep(2);
+
+    if (serialDataAvail(_serialFd)) {
+        printf("Rcv: ");
+        while (serialDataAvail()) {
+            putchar((char)serialGetchar(_serialFd));
+        }
+    }
+
 
     /* configure db */
     _sql.setUser(_sqlCfg.user);
