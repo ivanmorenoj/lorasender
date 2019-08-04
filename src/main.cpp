@@ -22,7 +22,7 @@ int main(int argc, char const *argv[])
 {
     /* Variables */
     uint64_t _latestId = 0;
-    char _buff[50];
+    char _buff[100];
     uint8_t _status;
 
     /* structs */
@@ -50,7 +50,7 @@ int main(int argc, char const *argv[])
 
     for (uint8_t i = 0; i < 5; i++) {
         std::string tmpDev = "/dev/ttyACM" + std::to_string(i);
-        memset(_buff,0,50);
+        memset(_buff,0,100);
         strcpy(_buff, tmpDev.c_str());
 
         /* open serial Port */
@@ -61,9 +61,8 @@ int main(int argc, char const *argv[])
 
             _ser.puts("[CC]");
             sleep(2);
-            std::string tmp = _ser.read();
             
-            if (tmp.find(std::string("OK")) != std::string::npos) {
+            if (_ser.read().find(std::string("OK")) != std::string::npos) {
                 PLOG_INFO << "Match protocol in: " << _buff;
                 break;
             }
@@ -73,7 +72,7 @@ int main(int argc, char const *argv[])
 
     /* check if the serial port is open */
     if (!_status) {
-        cout << "Cannot connect to serial port\n";
+        PLOG_FATAL << "Cannot connect to serial port\n";
         return EXIT_FAILURE;
     }
 
@@ -93,22 +92,19 @@ int main(int argc, char const *argv[])
 
             makeLoRaPayload(&_gv,&_lp);
 
-            memset(_buff,0,50);
-
-            strcpy(_buff,"[SP]");
-            for (uint8_t i = 0; i < 19; i++)
-                _buff[i + 4] = _lp._raw[i];
+            preparePayload(&_lp,_buff,100);
 
             /* DEBUG */
             printf("RAW Payload: ");
             for (uint8_t i = 0; i < 20; i++) {
-                printf("\\x%02X",_lp._raw[i]);
+                printf("%02X",_lp._raw[i]);
             }
             printf("\n");
+            cout << "STR: " << _buff;
 
-            _ser.write((unsigned char *)_buff,23);
+            _ser.write((unsigned char *)_buff,strlen(_buff));
             _ser.flush();
-            sleep(5);
+            sleep(3);
 
             if (!(_ser.read().find(std::string("OK")) != std::string::npos)) {
                 PLOG_ERROR << "No response when send [SP]";
