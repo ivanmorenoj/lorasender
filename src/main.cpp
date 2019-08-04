@@ -5,6 +5,7 @@
 #include "dbStruct.h"
 #include "cfgSettings.h"
 #include "convertions.h"
+#include "serial.h"
 
 //#define INSTALL
 #ifdef INSTALL
@@ -23,7 +24,6 @@ int main(int argc, char const *argv[])
     /* Variables */
     uint64_t _latestId;
     char _device[20];
-    int _serialFd;
 
     /* structs */
     gas_values _gv;
@@ -45,28 +45,6 @@ int main(int argc, char const *argv[])
         PLOG_ERROR << "Culdn't get config";
         return EXIT_FAILURE;
     }
-
-    /* Open Serial port */
-    _serialFd = serialOpen("/dev/ttyACM0",115200);
-
-    if (_serialFd < 0) {
-        cout << "cannot open serial port";
-        return EXIT_FAILURE;
-    } else {
-        cout << "serial port open";
-    }
-
-    /* check protocol */
-    serialPuts(_serialFd,"[CC]");
-    sleep(2);
-
-    if (serialDataAvail(_serialFd)) {
-        printf("Rcv: ");
-        while (serialDataAvail()) {
-            putchar((char)serialGetchar(_serialFd));
-        }
-    }
-
 
     /* configure db */
     _sql.setUser(_sqlCfg.user);
