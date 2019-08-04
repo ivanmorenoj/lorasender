@@ -43,7 +43,7 @@ int main(int argc, char const *argv[])
         //printSettings(&_sqlCfg);
     }
     else {
-        PLOG_ERROR << "Culdn't get config";
+        PLOG_FATAL << "Couldn't get config";
         return EXIT_FAILURE;
     }
 
@@ -59,7 +59,7 @@ int main(int argc, char const *argv[])
         if (_status) {
             PLOG_INFO << "Check communication on: " << _buff;
 
-            _ser.puts("[CC]");
+            _ser.write((const unsigned char *)"[CC]\n",5);
             sleep(2);
             
             if (_ser.read().find(std::string("OK")) != std::string::npos) {
@@ -93,14 +93,6 @@ int main(int argc, char const *argv[])
             makeLoRaPayload(&_gv,&_lp);
 
             preparePayload(&_lp,_buff,100);
-
-            /* DEBUG */
-            printf("RAW Payload: ");
-            for (uint8_t i = 0; i < 20; i++) {
-                printf("%02X",_lp._raw[i]);
-            }
-            printf("\n");
-            cout << "STR: " << _buff;
 
             _ser.write((unsigned char *)_buff,strlen(_buff));
             _ser.flush();
