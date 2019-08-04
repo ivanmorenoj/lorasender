@@ -21,8 +21,8 @@ using ::std::endl;
 int main(int argc, char const *argv[])
 {
     /* Variables */
-    uint64_t _latestId;
-    char _device[30];
+    uint64_t _latestId = 0;
+    char _buff[50];
     uint8_t _status;
 
     /* structs */
@@ -50,23 +50,24 @@ int main(int argc, char const *argv[])
 
     for (uint8_t i = 0; i < 5; i++) {
         std::string tmpDev = "/dev/ttyACM" + std::to_string(i);
-        memset(_device,0,30);
-        strcpy(_device, tmpDev.c_str());
+        memset(_buff,0,50);
+        strcpy(_buff, tmpDev.c_str());
 
         /* open serial Port */
-        _status = _ser.open(_device,115200); 
+        _status = _ser.open(_buff,115200); 
 
         if (_status) {
-            PLOG_INFO << "Check communication on: " << _device;
+            PLOG_INFO << "Check communication on: " << _buff;
 
             _ser.puts("[CC]");
             sleep(2);
             std::string tmp = _ser.read();
             
             if (tmp.find(std::string("OK")) != std::string::npos) {
-                PLOG_INFO << "Match protocol in: " << _device;
+                PLOG_INFO << "Match protocol in: " << _buff;
                 break;
             }
+            _ser.close();
         }
     }
 
@@ -84,10 +85,37 @@ int main(int argc, char const *argv[])
     
     /* connect to db*/
     _sql.connect();
+    
+    for (;;) {
+        if (_sql.getLatestId() > _latestId){
+            _sql.fetch_gas_values(&_gv);
+            _latestId = _gv._id;
 
-    /*for (;;) {
+            makeLoRaPayload(&_gv,&_lp);
 
-    }*/
+            memset(_buff,0,50);
+
+            strcpy(_buff,"[SP]");
+            for (uint8_t i = 0; i < 19; i++)
+                _buff[i + 4] = _lp._raw[i];
+
+            /* DEBUG */
+            printf("RAW Payload: ");
+            for (uint8_t i = 0; i < 20; i++) {
+                printf("\\x%02X",_lp._raw[i]);
+            }
+            printf("\n");
+
+            _ser.write((unsigned char *)_buff,23);
+            _ser.flush();
+            sleep(5);
+
+            if (!(_ser.read().find(std::string("OK")) != std::string::npos)) {
+                PLOG_ERROR << "No response when send [SP]";
+            }
+        }
+        sleep(60);
+    }
     
     return EXIT_SUCCESS;
 }

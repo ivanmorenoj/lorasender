@@ -78,3 +78,7 @@ std::string Serial::read() {
     return std::string(tmpbuff);
 }
 
+void Serial::write(const unsigned char *s,unsigned int size) {
+    for (unsigned int i = 0; i < size; i++)
+        serialPutchar(_fd, s[i]);
+}

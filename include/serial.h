@@ -25,6 +25,7 @@ public:
     int dataAvail() ;
     int getchar() ;
 
+    void write(const unsigned char *s,unsigned int size);
     std::string read();
 };
 
