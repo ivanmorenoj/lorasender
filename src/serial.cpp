@@ -30,10 +30,11 @@ void Serial::setConfigValues(const char *_device,const int _bauRate) {
 
 uint8_t Serial::open() {
     _fd = serialOpen(_dev,_baud);
-    if ( _fd > 0) {
-        return 1;
+    if ( _fd < 0) {
+        PLOG_ERROR << "Cannot open serial port: " << _dev;
+        return 0;
     }
-    return 0;
+    return 1;
 }
 
 uint8_t Serial::open(const char *_device,const int _bauRate) {

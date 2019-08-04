@@ -1,5 +1,4 @@
 #include <iostream>
-#include <wiringSerial.h>
 #include "plog/Log.h"
 #include "sqlConnector.h"
 #include "dbStruct.h"
@@ -31,6 +30,7 @@ int main(int argc, char const *argv[])
 
     /* objets */
     sqlConnector _sql;
+    Serial _ser;
 
     plog::init(plog::debug, LOG_PATH, 1000000, 3); // Initialize the logger. 1MB
     PLOG_INFO << ">>>>>>>>>>>>>>>Init Program<<<<<<<<<<<<<<<";
@@ -45,6 +45,23 @@ int main(int argc, char const *argv[])
         PLOG_ERROR << "Culdn't get config";
         return EXIT_FAILURE;
     }
+
+    /* open serial Port */
+    if (_ser.open("/dev/ttyACM0",115200)) {
+        cout << "serial port open\n";
+    } else {
+        cout << "cannot open serial port\n";
+        return EXIT_FAILURE;
+    }
+
+    _ser.puts("[CC]");
+    sleep(2);
+    std::string tmp = _ser.read();
+    cout << "RCV: " << tmp << endl;
+
+    if (tmp.find(std::string("OK")) != std::string::npos)
+        cout << "\nmatch\n";
+
 
     /* configure db */
     _sql.setUser(_sqlCfg.user);
