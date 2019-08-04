@@ -22,7 +22,8 @@ int main(int argc, char const *argv[])
 {
     /* Variables */
     uint64_t _latestId;
-    char _device[20];
+    char _device[30];
+    uint8_t _status;
 
     /* structs */
     gas_values _gv;
@@ -46,22 +47,34 @@ int main(int argc, char const *argv[])
         return EXIT_FAILURE;
     }
 
-    /* open serial Port */
-    if (_ser.open("/dev/ttyACM0",115200)) {
-        cout << "serial port open\n";
-    } else {
-        cout << "cannot open serial port\n";
-        return EXIT_FAILURE;
+
+    for (uint8_t i = 0; i < 5; i++) {
+        std::string tmpDev = "/dev/ttyACM" + std::to_string(i);
+        memset(_device,0,30);
+        strcpy(_device, tmpDev.c_str());
+
+        /* open serial Port */
+        _status = _ser.open(_device,115200); 
+
+        if (_status) {
+            PLOG_INFO << "Check communication on: " << _device;
+
+            _ser.puts("[CC]");
+            sleep(2);
+            std::string tmp = _ser.read();
+            
+            if (tmp.find(std::string("OK")) != std::string::npos) {
+                PLOG_INFO << "Match protocol in: " << _device;
+                break;
+            }
+        }
     }
 
-    _ser.puts("[CC]");
-    sleep(2);
-    std::string tmp = _ser.read();
-    cout << "RCV: " << tmp << endl;
-
-    if (tmp.find(std::string("OK")) != std::string::npos)
-        cout << "\nmatch\n";
-
+    /* check if the serial port is open */
+    if (!_status) {
+        cout << "Cannot connect to serial port\n";
+        return EXIT_FAILURE;
+    }
 
     /* configure db */
     _sql.setUser(_sqlCfg.user);
