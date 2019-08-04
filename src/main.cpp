@@ -4,7 +4,7 @@
 #include "dbStruct.h"
 #include "cfgSettings.h"
 #include "convertions.h"
-#include "LoraTransceiver.h"
+#include "serial.h"
 
 //#define INSTALL
 #ifdef INSTALL
@@ -12,7 +12,7 @@
     #define LOG_PATH    "/var/log/lorasender/lorasender.log"
 #else
     #define CFG_PATH    "mainConfig.cfg"
-    #define LOG_PATH    "lorasender.log"
+    #define LOG_PATH    "logger.log"
 #endif 
 
 using ::std::cout;
@@ -22,7 +22,8 @@ int main(int argc, char const *argv[])
 {
     /* Variables */
     uint64_t _latestId;
-    char _device[20];
+    char _device[30];
+    uint8_t _status;
 
     /* structs */
     gas_values _gv;
@@ -30,7 +31,7 @@ int main(int argc, char const *argv[])
 
     /* objets */
     sqlConnector _sql;
-    LoraTransceiver _lora;
+    Serial _ser;
 
     plog::init(plog::debug, LOG_PATH, 1000000, 3); // Initialize the logger. 1MB
     PLOG_INFO << ">>>>>>>>>>>>>>>Init Program<<<<<<<<<<<<<<<";
@@ -46,33 +47,32 @@ int main(int argc, char const *argv[])
         return EXIT_FAILURE;
     }
 
-    /* Connect to usb stick */
-    uint8_t _status;
-    for (uint8_t _devNumber = 0; _devNumber < 5; _devNumber++) {
-        std::string dev = "/dev/ttyACM" + std::to_string(_devNumber);
-        strcpy(_device,dev.c_str());
 
-        _lora.setConfigValues(_device,115200);
-        _status = _lora.openSerial();
-        
-        if (_status){
-            PLOG_INFO << "Check communication to: " << _device;
-            _lora.sendPayload("[CC]");
+    for (uint8_t i = 0; i < 5; i++) {
+        std::string tmpDev = "/dev/ttyACM" + std::to_string(i);
+        memset(_device,0,30);
+        strcpy(_device, tmpDev.c_str());
+
+        /* open serial Port */
+        _status = _ser.open(_device,115200); 
+
+        if (_status) {
+            PLOG_INFO << "Check communication on: " << _device;
+
+            _ser.puts("[CC]");
             sleep(2);
-        
-            std::string readStr = _lora.read();
-            if (readStr.find(std::string("OK")) != std::string::npos) {
-                PLOG_INFO << "Match protocol with: " << _device;
-                //cout << "connected";
+            std::string tmp = _ser.read();
+            
+            if (tmp.find(std::string("OK")) != std::string::npos) {
+                PLOG_INFO << "Match protocol in: " << _device;
                 break;
             }
-            _lora.closeSerial();
         }
-        sleep(1);
     }
 
+    /* check if the serial port is open */
     if (!_status) {
-        PLOG_ERROR << "Can't open serial port";
+        cout << "Cannot connect to serial port\n";
         return EXIT_FAILURE;
     }
 
