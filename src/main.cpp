@@ -1,4 +1,7 @@
-#include <iostream>
+/**
+ *  Author: Ivan Moreno <ivan1697@gmail.com>
+ *      August 2019
+ */
 #include "plog/Log.h"
 #include "sqlConnector.h"
 #include "dbStruct.h"
@@ -6,7 +9,7 @@
 #include "convertions.h"
 #include "serial.h"
 
-//#define INSTALL
+#define INSTALL
 #ifdef INSTALL
     #define CFG_PATH    "/etc/lorasender/config.cfg"
     #define LOG_PATH    "/var/log/lorasender/lorasender.log"
@@ -14,9 +17,6 @@
     #define CFG_PATH    "mainConfig.cfg"
     #define LOG_PATH    "logger.log"
 #endif 
-
-using ::std::cout;
-using ::std::endl;
 
 int main(int argc, char const *argv[])
 {
@@ -102,7 +102,7 @@ int main(int argc, char const *argv[])
                 PLOG_ERROR << "No response when send [SP]";
             }
         }
-        sleep(60);
+        sleep(30);
     }
     
     return EXIT_SUCCESS;
