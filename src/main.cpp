@@ -36,6 +36,9 @@ int main(int argc, char const *argv[])
     plog::init(plog::debug, LOG_PATH, 1000000, 3); // Initialize the logger. 1MB
     PLOG_INFO << ">>>>>>>>>>>>>>>Init Program<<<<<<<<<<<<<<<";
 
+    /* Pring log path and cfg path */
+    printf("Logs saved in: %s\nConfig file loaded from: %s\n",LOG_PATH,CFG_PATH);
+
     /* General Config */
     struct sql_cfg _sqlCfg = {0};
     if (getSettings(&_sqlCfg,CFG_PATH)){
