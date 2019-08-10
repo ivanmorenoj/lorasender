@@ -1,7 +1,10 @@
 #ifndef DBSTRUCT_H_
 #define DBSTRUCT_H_
 
+#include <iostream>
 #include <stdint.h>
+
+using std::string;
 
 struct sql_cfg {
     char user[50]; 
@@ -26,6 +29,23 @@ struct gas_values{
     float       _pm1;   // in ppm 
     float       _pm10;  // in ppm 
     float       _pm25;  // in ppm 
+};
+
+struct lora{
+    string      port;
+    uint8_t     txPower;
+    string      activationMethod;
+    string      dataRate;
+    string      channel;
+    string      NwkSKey;
+    string      AppSKey;
+    string      DevAddr;
+    uint32_t    frameCounter;
+};
+
+struct cfg_settings{
+    lora    _lora;
+    sql_cfg _sql;
 };
 
 struct byte_payload{
