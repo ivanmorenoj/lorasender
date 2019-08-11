@@ -33,7 +33,7 @@ struct gas_values{
 
 struct lora{
     string      port;
-    uint8_t     txPower;
+    string      txPower;
     string      activationMethod;
     string      dataRate;
     string      channel;

@@ -9,7 +9,7 @@
 #include "convertions.h"
 #include "serial.h"
 
-#define INSTALL
+//#define INSTALL
 #ifdef INSTALL
     #define CFG_PATH    "/etc/lorasender/config.cfg"
     #define LOG_PATH    "/var/log/lorasender/lorasender.log"
@@ -40,16 +40,15 @@ int main(int argc, char const *argv[])
     printf("Logs saved in: %s\nConfig file loaded from: %s\n",LOG_PATH,CFG_PATH);
 
     /* General Config */
-    struct sql_cfg _sqlCfg = {0};
-    if (getSettings(&_sqlCfg,CFG_PATH)){
+    cfg_settings _mainCfg;
+    if (getSettings(&_mainCfg,CFG_PATH)){
         PLOG_INFO << "Load config from: " << CFG_PATH;
-        //printSettings(&_sqlCfg);
+        //printSettings(&_mainCfg);
     }
     else {
         PLOG_FATAL << "Couldn't get config";
         return EXIT_FAILURE;
     }
-
 
     for (uint8_t i = 0; i < 5; i++) {
         std::string tmpDev = "/dev/ttyACM" + std::to_string(i);
@@ -80,10 +79,10 @@ int main(int argc, char const *argv[])
     }
 
     /* configure db */
-    _sql.setUser(_sqlCfg.user);
-    _sql.setPassword(_sqlCfg.pass);
-    _sql.setHost(_sqlCfg.host);
-    _sql.setSchema(_sqlCfg.schema);
+    _sql.setUser(_mainCfg._sql.user);
+    _sql.setPassword(_mainCfg._sql.pass);
+    _sql.setHost(_mainCfg._sql.host);
+    _sql.setSchema(_mainCfg._sql.schema);
     
     /* connect to db*/
     _sql.connect();
