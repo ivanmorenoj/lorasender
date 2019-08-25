@@ -2,45 +2,57 @@
 #include <stdio.h>
 #include "plog/Log.h"
 #include "clientModel.h"
+#include "utilities.h"
 
-static void hex2str(lora_payload *_lp,char *str) {
-    char * tmp = str;
-    for (uint8_t i = 0; i < 18; i++) {
-        sprintf(tmp,"%02X",_lp->_raw[i]);
-        tmp += 2;
-    }    
+clientModel::clientModel() {
+    _loraCfg = NULL;
+    _status = 0;
 }
 
-void makeLoRaPayload(struct gas_values *_gv, lora_payload *_lp) {
-    memset(_lp,0,sizeof(*_lp));
-
-    // ambiental variables
-    _lp->_bytes._tem = (int8_t)_gv->amb._tem;
-    _lp->_bytes._hum = (uint8_t)_gv->amb._hum;
-    _lp->_bytes._pre = (uint16_t)(_gv->amb._pre / 100.0);
-
-    // gas variables
-    _lp->_bytes._co    = (uint16_t)(_gv->_co   * 1000.0);
-    _lp->_bytes._o3    = (uint16_t)(_gv->_o3   * 1000.0);
-    _lp->_bytes._so2   = (uint16_t)(_gv->_so2  * 1000.0);
-    _lp->_bytes._no2   = (uint16_t)(_gv->_no2  * 1000.0);
-    _lp->_bytes._pm1   = (uint16_t)(_gv->_pm1  * 100.0);
-    _lp->_bytes._pm10  = (uint16_t)(_gv->_pm10 * 100.0);
-    _lp->_bytes._pm25  = (uint16_t)(_gv->_pm25 * 100.0);
+clientModel::clientModel(lora *_lora_cfg) {
+    this->_loraCfg = _lora_cfg;
 }
 
-void preparePayload(lora_payload *_lp,char *_buff,unsigned int len) {
-    memset(_buff,0,len);
+clientModel::~clientModel() {
+    if (_status)
+        _ser.close();
+}
 
-    strcpy(_buff,"[SP]");
+void clientModel::setConfig(lora *_lora_cfg) {
+    this->_loraCfg = _lora_cfg;
+}
 
-    hex2str(_lp,_buff + 4);
+Serial *clientModel::getSerial() {
+    return &_ser;
+}
 
-    strcat(_buff,"\n");
+uint8_t clientModel::openSerial() {
+    char _buff[50];
+    memset(_buff,0,50);
+
+    strcpy(_buff, _loraCfg->port.c_str());
+    _status = _ser.open(_buff,115200); 
+    if (_status) {
+        PLOG_INFO << "Check communication on: " << _buff;
+        if (sendCC()) {
+            _ser.close();
+            _status = 0;
+            PLOG_ERROR << "Doesn't match protocol in " << _buff;
+        }
+    }
+    return _status;
+}
+
+void clientModel::closeSerial() {
+    _ser.close();
+}
+
+uint8_t clientModel::getStatus() {
+    return _status;
 }
 
 /* Command: [CC] Check Communication */
-uint8_t clientSendCC() {
+uint8_t clientModel::sendCC() {
 
     // Send Command
     _ser.write((const unsigned char *)"[CC]\n",5);
@@ -53,7 +65,7 @@ uint8_t clientSendCC() {
 }
 
 /* Command: [SP] send payload*/
-uint8_t clientSendSP(lora_payload *_loraPayload,gas_values *_gasValues) {
+uint8_t clientModel::sendSP(lora_payload *_loraPayload,gas_values *_gasValues) {
 
     char _buff[100];
     memset(_buff,0,100);
@@ -75,49 +87,49 @@ uint8_t clientSendSP(lora_payload *_loraPayload,gas_values *_gasValues) {
 }
 
 /* Command: [TP] send Tx Power */
-uint8_t clientSendTP(lora *_lora) {
+uint8_t clientModel::sendTP() {
 
     return 0;
 }
 
 /* Command: [AM] send Activation method */
-uint8_t clientSendAM(lora *_lora) {
+uint8_t clientModel::sendAM() {
 
     return 0;
 }
 
 /* Command: [DR] send Data Rate */
-uint8_t clientSendDR(lora *_lora) {
+uint8_t clientModel::sendDR() {
 
     return 0;
 }
 
 /* Command: [CH] send Channel */
-uint8_t clientSendCH(lora *_lora) {
+uint8_t clientModel::sendCH() {
 
     return 0;
 }
 
 /* Command: [NK] send Network key */
-uint8_t clientSendNK(lora *_lora) {
+uint8_t clientModel::sendNK() {
 
     return 0;
 }
 
 /* Command: [AK] send App key */
-uint8_t clientSendAK(lora *_lora) {
+uint8_t clientModel::sendAK() {
 
     return 0;
 }
 
 /* Command: [DA] send Device Address */
-uint8_t clientSendDA(lora *_lora) {
+uint8_t clientModel::sendDA() {
 
     return 0;
 }
 
 /* Command: [FC] send Frame counter */
-uint8_t clientSendFC(lora *_lora) {
+uint8_t clientModel::sendFC() {
 
     return 0;
 }
