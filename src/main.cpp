@@ -6,7 +6,6 @@
 #include "sqlConnector.h"
 #include "dbStruct.h"
 #include "cfgSettings.h"
-#include "serial.h"
 #include "clientModel.h"
 
 //#define INSTALL
@@ -18,18 +17,10 @@
     #define LOG_PATH    "logger.log"
 #endif 
 
-
-/**
- *  Defined Serial objet for shared use 
- */
-Serial _ser;
-
 int main(int argc, char const *argv[])
 {
     /* Variables */
     uint64_t _latestId = 0;
-    char _buff[100];
-    uint8_t _status;
 
     /* structs */
     cfg_settings _mainCfg;
@@ -38,6 +29,7 @@ int main(int argc, char const *argv[])
 
     /* objets */
     sqlConnector _sql;
+    clientModel _client;
 
     plog::init(plog::debug, LOG_PATH, 1000000, 3); // Initialize the logger. 1MB
     PLOG_INFO << ">>>>>>>>>>>>>>>Init Program<<<<<<<<<<<<<<<";
@@ -55,29 +47,12 @@ int main(int argc, char const *argv[])
         return EXIT_FAILURE;
     }
 
-    for (uint8_t i = 0; i < 5; i++) {
-        std::string tmpDev = "/dev/ttyACM" + std::to_string(i);
-        memset(_buff,0,100);
-        strcpy(_buff, tmpDev.c_str());
+    /* Connect with lora stick */
+    _client.setConfig(&_mainCfg._lora);
 
-        /* open serial Port */
-        _status = _ser.open(_buff,115200); 
-
-        if (_status) {
-            PLOG_INFO << "Check communication on: " << _buff;
-
-            if (!clientSendCC()) {
-                PLOG_INFO << "Match protocolo in: " << _buff;
-                break;
-            }
-
-            _ser.close();
-        }
-    }
-
-    /* check if the serial port is open */
-    if (!_status) {
-        PLOG_FATAL << "Cannot connect to serial port\n";
+    /*Open serial port loaded from cfg file */
+    if (!_client.openSerial()) {
+        PLOG_FATAL << "Cannot connect to serial port";
         return EXIT_FAILURE;
     }
 
@@ -95,7 +70,7 @@ int main(int argc, char const *argv[])
             _sql.fetch_gas_values(&_gv);
             _latestId = _gv._id;
 
-            clientSendSP(&_lp,&_gv);
+            _client.sendSP(&_lp,&_gv);
         }
         sleep(30);
     }
