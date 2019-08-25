@@ -82,3 +82,7 @@ void Serial::write(const unsigned char *s,unsigned int size) {
     for (unsigned int i = 0; i < size; i++)
         serialPutchar(_fd, s[i]);
 }
+
+std::string Serial::getDevice() {
+    return std::string(this->_dev);
+}

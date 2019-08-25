@@ -2,11 +2,18 @@
 #define CLIENT_MODEL_H_
 
 #include "dbStruct.h"
+#include "serial.h"
+
+extern Serial _ser;
+
+/**
+ *  All functions return 0 on success and non zero in otherwise 
+ */
 
 /* Chech comminication */
-uint8_t clientSendCC(lora *_lora);
+uint8_t clientSendCC();
 /* Send Payload */
-uint8_t clientSendSP(lora *_lora);
+uint8_t clientSendSP(lora_payload *_loraPayload,gas_values *_gasvalues);
 /* send Tx Power */
 uint8_t clientSendTP(lora *_lora);
 /* send Activation method */
@@ -23,6 +30,5 @@ uint8_t clientSendAK(lora *_lora);
 uint8_t clientSendDA(lora *_lora);
 /* send Frame counter */
 uint8_t clientSendFC(lora *_lora);
-
 
 #endif //CLIENT_MODEL_H_
