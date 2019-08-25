@@ -6,8 +6,8 @@
 #include "sqlConnector.h"
 #include "dbStruct.h"
 #include "cfgSettings.h"
-#include "convertions.h"
 #include "serial.h"
+#include "clientModel.h"
 
 //#define INSTALL
 #ifdef INSTALL
@@ -18,6 +18,12 @@
     #define LOG_PATH    "logger.log"
 #endif 
 
+
+/**
+ *  Defined Serial objet for shared use 
+ */
+Serial _ser;
+
 int main(int argc, char const *argv[])
 {
     /* Variables */
@@ -26,12 +32,12 @@ int main(int argc, char const *argv[])
     uint8_t _status;
 
     /* structs */
+    cfg_settings _mainCfg;
     gas_values _gv;
     lora_payload _lp;
 
     /* objets */
     sqlConnector _sql;
-    Serial _ser;
 
     plog::init(plog::debug, LOG_PATH, 1000000, 3); // Initialize the logger. 1MB
     PLOG_INFO << ">>>>>>>>>>>>>>>Init Program<<<<<<<<<<<<<<<";
@@ -40,7 +46,6 @@ int main(int argc, char const *argv[])
     printf("Logs saved in: %s\nConfig file loaded from: %s\n",LOG_PATH,CFG_PATH);
 
     /* General Config */
-    cfg_settings _mainCfg;
     if (getSettings(&_mainCfg,CFG_PATH)){
         PLOG_INFO << "Load config from: " << CFG_PATH;
         //printSettings(&_mainCfg);
@@ -61,13 +66,11 @@ int main(int argc, char const *argv[])
         if (_status) {
             PLOG_INFO << "Check communication on: " << _buff;
 
-            _ser.write((const unsigned char *)"[CC]\n",5);
-            sleep(2);
-            
-            if (_ser.read().find(std::string("OK")) != std::string::npos) {
-                PLOG_INFO << "Match protocol in: " << _buff;
+            if (!clientSendCC()) {
+                PLOG_INFO << "Match protocolo in: " << _buff;
                 break;
             }
+
             _ser.close();
         }
     }
@@ -92,17 +95,7 @@ int main(int argc, char const *argv[])
             _sql.fetch_gas_values(&_gv);
             _latestId = _gv._id;
 
-            makeLoRaPayload(&_gv,&_lp);
-
-            preparePayload(&_lp,_buff,100);
-
-            _ser.write((unsigned char *)_buff,strlen(_buff));
-            _ser.flush();
-            sleep(3);
-
-            if (!(_ser.read().find(std::string("OK")) != std::string::npos)) {
-                PLOG_ERROR << "No response when send [SP]";
-            }
+            clientSendSP(&_lp,&_gv);
         }
         sleep(30);
     }

@@ -27,6 +27,7 @@ public:
 
     void write(const unsigned char *s,unsigned int size);
     std::string read();
+    std::string getDevice();
 };
 
 

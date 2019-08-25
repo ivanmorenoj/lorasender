@@ -14,8 +14,8 @@ SRC_EXT = cpp
 
 # remote host copy #
 REMOTE_USER = pi
-REMOTE_HOST = 192.168.1.6
-REMOTE_DIR	= ~/Documents/senderSqlLoRa/
+REMOTE_HOST = 192.168.1.15
+REMOTE_DIR	= ~/senderSqlLoRa/
 REMOTE_WAN	= ivan28823.sytes.net
 WAN_PORT	= 3215
 
