@@ -15,6 +15,7 @@ private:
     Serial _ser;
     lora *_loraCfg;
     uint8_t _status;
+    char _buff[100];
 
 public:
     clientModel();
