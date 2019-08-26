@@ -63,15 +63,24 @@ int main(int argc, char const *argv[])
     _sql.setSchema(_mainCfg._sql.schema);
     
     /* connect to db*/
-    _sql.connect();
+    //_sql.connect();
     
     for (;;) {
-        if (_sql.getLatestId() > _latestId){
+        /*if (_sql.getLatestId() > _latestId){
             _sql.fetch_gas_values(&_gv);
             _latestId = _gv._id;
 
-            _client.sendSP(&_lp,&_gv);
-        }
+            //_client.sendSP(&_lp,&_gv);
+        }*/
+        _client.sendSP(&_lp,&_gv);
+        _client.sendTP();
+        _client.sendAM();
+        _client.sendDR();
+        _client.sendCH();
+        _client.sendNK();
+        _client.sendAK();
+        _client.sendDA();
+        _client.sendFC();
         sleep(30);
     }
     

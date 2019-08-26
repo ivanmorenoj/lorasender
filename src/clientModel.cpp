@@ -7,10 +7,13 @@
 clientModel::clientModel() {
     _loraCfg = NULL;
     _status = 0;
+    memset(_buff,0,100);
 }
 
 clientModel::clientModel(lora *_lora_cfg) {
     this->_loraCfg = _lora_cfg;
+    _status = 0;
+    memset(_buff,0,100);
 }
 
 clientModel::~clientModel() {
@@ -27,8 +30,7 @@ Serial *clientModel::getSerial() {
 }
 
 uint8_t clientModel::openSerial() {
-    char _buff[50];
-    memset(_buff,0,50);
+    memset(_buff,0,100);
 
     strcpy(_buff, _loraCfg->port.c_str());
     _status = _ser.open(_buff,115200); 
@@ -56,6 +58,7 @@ uint8_t clientModel::sendCC() {
 
     // Send Command
     _ser.write((const unsigned char *)"[CC]\n",5);
+    _ser.flush();
     sleep(2);
     
     if (_ser.read().find(std::string("OK")) != std::string::npos)
@@ -66,12 +69,12 @@ uint8_t clientModel::sendCC() {
 
 /* Command: [SP] send payload*/
 uint8_t clientModel::sendSP(lora_payload *_loraPayload,gas_values *_gasValues) {
-
-    char _buff[100];
     memset(_buff,0,100);
 
     makeLoRaPayload(_gasValues,_loraPayload);
     preparePayload(_loraPayload,_buff,100);
+
+    std::cout << _buff << std::endl;
 
     _ser.write((unsigned char *)_buff,strlen(_buff));
     _ser.flush();
@@ -88,48 +91,137 @@ uint8_t clientModel::sendSP(lora_payload *_loraPayload,gas_values *_gasValues) {
 
 /* Command: [TP] send Tx Power */
 uint8_t clientModel::sendTP() {
+    int txPw = std::stoi(_loraCfg->txPower);
+    memset(_buff,0,100);
+    sprintf(_buff,"[TP]%X\n", (uint8_t)(txPw > 0x0F ? 0x0F : txPw));
 
+    std::cout << _buff << std::endl;
+
+    _ser.write((unsigned char *)_buff,strlen(_buff));
+    _ser.flush();
+    sleep(2);
+    if (!(_ser.read().find(std::string("OK")) != std::string::npos)) {
+        PLOG_ERROR << "No response when send [TP]";
+        return 1;
+    }
     return 0;
 }
 
 /* Command: [AM] send Activation method */
 uint8_t clientModel::sendAM() {
+    memset(_buff,0,100);
+    sprintf(_buff,"[AM]%s\n",_loraCfg->activationMethod.c_str());
 
+    std::cout << _buff << std::endl;
+
+    _ser.write((unsigned char *)_buff,strlen(_buff));
+    _ser.flush();
+    sleep(2);
+    if (!(_ser.read().find(std::string("OK")) != std::string::npos)) {
+        PLOG_ERROR << "No response when send [AM]";
+        return 1;
+    }
     return 0;
 }
 
 /* Command: [DR] send Data Rate */
 uint8_t clientModel::sendDR() {
+    memset(_buff,0,100);
+    sprintf(_buff,"[DR]%s\n",_loraCfg->dataRate.c_str());
 
+    std::cout << _buff << std::endl;
+
+    _ser.write((unsigned char *)_buff,strlen(_buff));
+    _ser.flush();
+    sleep(2);
+    if (!(_ser.read().find(std::string("OK")) != std::string::npos)) {
+        PLOG_ERROR << "No response when send [DR]";
+        return 1;
+    }
     return 0;
 }
 
 /* Command: [CH] send Channel */
 uint8_t clientModel::sendCH() {
+    memset(_buff,0,100);
+    sprintf(_buff,"[CH]%s\n",_loraCfg->channel.c_str());
 
+    std::cout << _buff << std::endl;
+
+    _ser.write((unsigned char *)_buff,strlen(_buff));
+    _ser.flush();
+    sleep(2);
+    if (!(_ser.read().find(std::string("OK")) != std::string::npos)) {
+        PLOG_ERROR << "No response when send [CH]";
+        return 1;
+    }
     return 0;
 }
 
 /* Command: [NK] send Network key */
 uint8_t clientModel::sendNK() {
+    memset(_buff,0,100);
+    sprintf(_buff,"[NK]%s\n",_loraCfg->NwkSKey.c_str());
 
+    std::cout << _buff << std::endl;
+
+    _ser.write((unsigned char *)_buff,strlen(_buff));
+    _ser.flush();
+    sleep(2);
+    if (!(_ser.read().find(std::string("OK")) != std::string::npos)) {
+        PLOG_ERROR << "No response when send [NK]";
+        return 1;
+    }
     return 0;
 }
 
 /* Command: [AK] send App key */
 uint8_t clientModel::sendAK() {
+    memset(_buff,0,100);
+    sprintf(_buff,"[AK]%s\n",_loraCfg->AppSKey.c_str());
 
+    std::cout << _buff << std::endl;
+
+    _ser.write((unsigned char *)_buff,strlen(_buff));
+    _ser.flush();
+    sleep(2);
+    if (!(_ser.read().find(std::string("OK")) != std::string::npos)) {
+        PLOG_ERROR << "No response when send [AK]";
+        return 1;
+    }
     return 0;
 }
 
 /* Command: [DA] send Device Address */
 uint8_t clientModel::sendDA() {
+    memset(_buff,0,100);
+    sprintf(_buff,"[DA]%s\n",_loraCfg->DevAddr.c_str());
 
+    std::cout << _buff << std::endl;
+
+    _ser.write((unsigned char *)_buff,strlen(_buff));
+    _ser.flush();
+    sleep(2);
+    if (!(_ser.read().find(std::string("OK")) != std::string::npos)) {
+        PLOG_ERROR << "No response when send [DA]";
+        return 1;
+    }
     return 0;
 }
 
 /* Command: [FC] send Frame counter */
 uint8_t clientModel::sendFC() {
+    memset(_buff,0,100);
+    sprintf(_buff,"[FC]%08X\n",_loraCfg->frameCounter);
 
+    std::cout << _buff << std::endl;
+
+    _ser.write((unsigned char *)_buff,strlen(_buff));
+    _ser.flush();
+    sleep(2);
+    if (!(_ser.read().find(std::string("OK")) != std::string::npos)) {
+        PLOG_ERROR << "No response when send [FC]";
+        return 1;
+    }
     return 0;
 }
