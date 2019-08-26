@@ -55,6 +55,15 @@ int main(int argc, char const *argv[])
         PLOG_FATAL << "Cannot connect to serial port";
         return EXIT_FAILURE;
     }
+    
+    /*Send config Values to usb stick */
+    if ( _client.sendTP() || _client.sendAM() || 
+         _client.sendDR() || _client.sendCH() || 
+         _client.sendNK() || _client.sendAK() || 
+         _client.sendDA() || _client.sendFC() ) {
+        std::cout << "Problem when sending config to usb stick\n"; 
+    }
+
 
     /* configure db */
     _sql.setUser(_mainCfg._sql.user);
@@ -63,24 +72,15 @@ int main(int argc, char const *argv[])
     _sql.setSchema(_mainCfg._sql.schema);
     
     /* connect to db*/
-    //_sql.connect();
+    _sql.connect();
     
     for (;;) {
-        /*if (_sql.getLatestId() > _latestId){
+        if (_sql.getLatestId() > _latestId){
             _sql.fetch_gas_values(&_gv);
             _latestId = _gv._id;
 
-            //_client.sendSP(&_lp,&_gv);
-        }*/
-        _client.sendSP(&_lp,&_gv);
-        _client.sendTP();
-        _client.sendAM();
-        _client.sendDR();
-        _client.sendCH();
-        _client.sendNK();
-        _client.sendAK();
-        _client.sendDA();
-        _client.sendFC();
+            _client.sendSP(&_lp,&_gv);
+        }
         sleep(30);
     }
     

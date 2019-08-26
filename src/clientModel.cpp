@@ -74,8 +74,6 @@ uint8_t clientModel::sendSP(lora_payload *_loraPayload,gas_values *_gasValues) {
     makeLoRaPayload(_gasValues,_loraPayload);
     preparePayload(_loraPayload,_buff,100);
 
-    std::cout << _buff << std::endl;
-
     _ser.write((unsigned char *)_buff,strlen(_buff));
     _ser.flush();
     
@@ -95,8 +93,6 @@ uint8_t clientModel::sendTP() {
     memset(_buff,0,100);
     sprintf(_buff,"[TP]%X\n", (uint8_t)(txPw > 0x0F ? 0x0F : txPw));
 
-    std::cout << _buff << std::endl;
-
     _ser.write((unsigned char *)_buff,strlen(_buff));
     _ser.flush();
     sleep(2);
@@ -111,8 +107,6 @@ uint8_t clientModel::sendTP() {
 uint8_t clientModel::sendAM() {
     memset(_buff,0,100);
     sprintf(_buff,"[AM]%s\n",_loraCfg->activationMethod.c_str());
-
-    std::cout << _buff << std::endl;
 
     _ser.write((unsigned char *)_buff,strlen(_buff));
     _ser.flush();
@@ -129,8 +123,6 @@ uint8_t clientModel::sendDR() {
     memset(_buff,0,100);
     sprintf(_buff,"[DR]%s\n",_loraCfg->dataRate.c_str());
 
-    std::cout << _buff << std::endl;
-
     _ser.write((unsigned char *)_buff,strlen(_buff));
     _ser.flush();
     sleep(2);
@@ -145,8 +137,6 @@ uint8_t clientModel::sendDR() {
 uint8_t clientModel::sendCH() {
     memset(_buff,0,100);
     sprintf(_buff,"[CH]%s\n",_loraCfg->channel.c_str());
-
-    std::cout << _buff << std::endl;
 
     _ser.write((unsigned char *)_buff,strlen(_buff));
     _ser.flush();
@@ -163,8 +153,6 @@ uint8_t clientModel::sendNK() {
     memset(_buff,0,100);
     sprintf(_buff,"[NK]%s\n",_loraCfg->NwkSKey.c_str());
 
-    std::cout << _buff << std::endl;
-
     _ser.write((unsigned char *)_buff,strlen(_buff));
     _ser.flush();
     sleep(2);
@@ -179,8 +167,6 @@ uint8_t clientModel::sendNK() {
 uint8_t clientModel::sendAK() {
     memset(_buff,0,100);
     sprintf(_buff,"[AK]%s\n",_loraCfg->AppSKey.c_str());
-
-    std::cout << _buff << std::endl;
 
     _ser.write((unsigned char *)_buff,strlen(_buff));
     _ser.flush();
@@ -197,8 +183,6 @@ uint8_t clientModel::sendDA() {
     memset(_buff,0,100);
     sprintf(_buff,"[DA]%s\n",_loraCfg->DevAddr.c_str());
 
-    std::cout << _buff << std::endl;
-
     _ser.write((unsigned char *)_buff,strlen(_buff));
     _ser.flush();
     sleep(2);
@@ -213,8 +197,6 @@ uint8_t clientModel::sendDA() {
 uint8_t clientModel::sendFC() {
     memset(_buff,0,100);
     sprintf(_buff,"[FC]%08X\n",_loraCfg->frameCounter);
-
-    std::cout << _buff << std::endl;
 
     _ser.write((unsigned char *)_buff,strlen(_buff));
     _ser.flush();
