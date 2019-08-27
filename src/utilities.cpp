@@ -2,7 +2,7 @@
 #include "dbStruct.h"
 #include "utilities.h"
 
-static void hex2str(lora_payload *_lp,char *str) {
+void hex2str(lora_payload *_lp,char *str) {
     char * tmp = str;
     for (uint8_t i = 0; i < 18; i++) {
         sprintf(tmp,"%02X",_lp->_raw[i]);
@@ -26,14 +26,4 @@ void makeLoRaPayload(struct gas_values *_gv, lora_payload *_lp) {
     _lp->_bytes._pm1   = (uint16_t)(_gv->_pm1  * 100.0);
     _lp->_bytes._pm10  = (uint16_t)(_gv->_pm10 * 100.0);
     _lp->_bytes._pm25  = (uint16_t)(_gv->_pm25 * 100.0);
-}
-
-void preparePayload(lora_payload *_lp,char *_buff,unsigned int len) {
-    memset(_buff,0,len);
-
-    strcpy(_buff,"[SP]");
-
-    hex2str(_lp,_buff + 4);
-
-    strcat(_buff,"\n");
 }

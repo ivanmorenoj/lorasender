@@ -20,6 +20,9 @@ int getSettings(struct cfg_settings *_con,const char *_path) {
     }
     const libconfig::Setting &root = cfg.getRoot();
     try {
+        /* Lookup sapling Time */
+        _con->_saplingTime = root["samplingTime"];
+        
         /* lookup database config*/
         string tmp[4];
         const libconfig::Setting &_db = root["sqlDataBase"];
@@ -27,6 +30,7 @@ int getSettings(struct cfg_settings *_con,const char *_path) {
         _db.lookupValue("password", tmp[1]);
         _db.lookupValue("host",     tmp[2]);
         _db.lookupValue("schema",   tmp[3]);
+        
         /* copy values */
         strcpy(_con->_sql.user,  tmp[0].c_str());
         strcpy(_con->_sql.pass,  tmp[1].c_str());
@@ -56,6 +60,8 @@ int getSettings(struct cfg_settings *_con,const char *_path) {
     return success;
 }
 void printSettings(struct cfg_settings *_con) {
+    std::cout << "Sampling Time = " << _con->_saplingTime << std::endl;
+
     std::cout << "\nData Base"
               << "\n\tDB user:\t" << string(_con->_sql.user)
               << "\n\tDB pass:\t" << string(_con->_sql.pass)

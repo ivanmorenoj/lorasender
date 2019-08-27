@@ -16,6 +16,7 @@ private:
     lora *_loraCfg;
     uint8_t _status;
     char _buff[100];
+    uint8_t sendAndWaitOK(uint8_t _len);
 
 public:
     clientModel();

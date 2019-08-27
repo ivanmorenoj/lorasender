@@ -41,8 +41,7 @@ int main(int argc, char const *argv[])
     if (getSettings(&_mainCfg,CFG_PATH)){
         PLOG_INFO << "Load config from: " << CFG_PATH;
         //printSettings(&_mainCfg);
-    }
-    else {
+    } else {
         PLOG_FATAL << "Couldn't get config";
         return EXIT_FAILURE;
     }
@@ -57,13 +56,18 @@ int main(int argc, char const *argv[])
     }
     
     /*Send config Values to usb stick */
-    if ( _client.sendTP() || _client.sendAM() || 
-         _client.sendDR() || _client.sendCH() || 
-         _client.sendNK() || _client.sendAK() || 
-         _client.sendDA() || _client.sendFC() ) {
-        std::cout << "Problem when sending config to usb stick\n"; 
+    uint8_t _errorCounter = 0;
+    while ( _client.sendTP() || _client.sendAM() || 
+            _client.sendDR() || _client.sendCH() || 
+            _client.sendNK() || _client.sendAK() || 
+            _client.sendDA() || _client.sendFC() ) {
+        PLOG_ERROR << "Problem when sending config to usb stick";
+        sleep(30);
+        if (_errorCounter++ > 5) {
+            PLOG_ERROR << "Cannot send config Values, exit";
+            return EXIT_FAILURE;
+        }
     }
-
 
     /* configure db */
     _sql.setUser(_mainCfg._sql.user);
@@ -81,7 +85,7 @@ int main(int argc, char const *argv[])
 
             _client.sendSP(&_lp,&_gv);
         }
-        sleep(30);
+        sleep(_mainCfg._saplingTime);
     }
     
     return EXIT_SUCCESS;
