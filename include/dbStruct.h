@@ -6,7 +6,7 @@
 
 using std::string;
 
-struct sql_cfg {
+struct sql_cfg{
     char user[50]; 
     char pass[50];
     char host[80];
@@ -44,8 +44,9 @@ struct lora{
 };
 
 struct cfg_settings{
-    lora    _lora;
-    sql_cfg _sql;
+    uint32_t    _saplingTime;
+    lora        _lora;
+    sql_cfg     _sql;
 };
 
 struct byte_payload{

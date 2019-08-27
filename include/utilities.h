@@ -2,6 +2,6 @@
 #define UTILITIES_H_
 
 void makeLoRaPayload(struct gas_values *_gv, lora_payload *_lp);
-void preparePayload(lora_payload *_lp,char *_buff,unsigned int len);
+void hex2str(lora_payload *_lp,char *str);
 
 #endif //UTILITIES_H_
