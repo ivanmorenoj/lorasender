@@ -14,10 +14,10 @@ SRC_EXT = cpp
 
 # remote host copy #
 REMOTE_USER = pi
-REMOTE_HOST = 192.168.1.15
+REMOTE_HOST = 192.168.20.4
 REMOTE_DIR	= ~/senderSqlLoRa/
-REMOTE_WAN	= ivan28823.sytes.net
-WAN_PORT	= 3215
+REMOTE_WAN	= vpngcpivan28823.duckdns.org
+WAN_PORT	= 2020
 
 # config file
 CFG_FILE 		= mainConfig.cfg

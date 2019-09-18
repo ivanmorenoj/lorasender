@@ -8,7 +8,7 @@
 #include "cfgSettings.h"
 #include "clientModel.h"
 
-//#define INSTALL
+#define INSTALL
 #ifdef INSTALL
     #define CFG_PATH    "/etc/lorasender/config.cfg"
     #define LOG_PATH    "/var/log/lorasender/lorasender.log"
@@ -83,7 +83,10 @@ int main(int argc, char const *argv[])
             _sql.fetch_gas_values(&_gv);
             _latestId = _gv._id;
 
-            _client.sendSP(&_lp,&_gv);
+            if (!_client.sendSP(&_lp,&_gv)) {
+                _mainCfg._lora.frameCounter++;
+                writeFrameCounter(&_mainCfg,CFG_PATH);
+            }
         }
         sleep(_mainCfg._saplingTime);
     }
