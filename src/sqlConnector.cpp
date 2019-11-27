@@ -112,6 +112,7 @@ uint64_t sqlConnector::getLatestId() {
   res = stmt->executeQuery(_query);
   if (res->next()) {
     _id = res->getInt("ID");
-  } 
+  }
+  delete res;
   return _id;
 }
