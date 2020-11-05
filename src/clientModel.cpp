@@ -147,6 +147,7 @@ uint8_t clientModel::sendAndWaitOK(uint8_t _len) {
     sleep(2);
     if (!(_ser.read().find(std::string("OK")) != std::string::npos)) {
         PLOG_ERROR << "No response found";
+        exit(EXIT_FAILURE);
         return 1;
     }
     return 0;
